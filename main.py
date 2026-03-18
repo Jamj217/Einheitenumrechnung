@@ -4,6 +4,20 @@ import tkinter as tk
 history = []
 
 
+# Formeln Dictionary
+formulas = {
+    ("Meter", "Meter"): ("Meter = Meter", "=", 1),
+    ("Meter", "Kilometer"): ("Kilometer = Meter / 1000", "/", 1000),
+    ("Meter", "Zentimeter"): ("Zentimeter = Meter * 100", "*", 100),
+    ("Kilometer", "Meter"): ("Meter = Kilometer * 1000", "*", 1000),
+    ("Kilometer", "Kilometer"): ("Kilometer = Kilometer", "=", 1),
+    ("Kilometer", "Zentimeter"): ("Zentimeter = Kilometer * 100000", "*", 100000),
+    ("Zentimeter", "Meter"): ("Meter = Zentimeter * 0.01", "*", 0.01),
+    ("Zentimeter", "Kilometer"): ("Kilometer = Zentimeter / 100000", "/", 100000),
+    ("Zentimeter", "Zentimeter"): ("Zentimeter = Zentimeter", "=", 1),
+}
+
+
 def convert():
     try:
         value = float(entry_value.get())
@@ -42,8 +56,21 @@ def convert():
         for item in history:
             listbox.insert(tk.END, item)
 
+        # Formel anzeigen
+        key = (from_unit, to_unit)
+        if key in formulas:
+            formula_text, op, factor = formulas[key]
+            if op == "=":
+                eingesetzt = f"{value} = {result:.4f}"
+            elif op == "*":
+                eingesetzt = f"{value} * {factor} = {result:.4f}"
+            elif op == "/":
+                eingesetzt = f"{value} / {factor} = {result:.4f}"
+            formula_label.config(text=f"Benutze Umrechnungssformel\n({from_unit} -> {to_unit}):\n{formula_text}\n\nEingesetzt:\n{eingesetzt}")
+
     except ValueError:
         result_label.config(text="Bitte eine gültige Zahl eingeben")
+        formula_label.config(text="Benutze Umrechnungssformel:")
 
 
 root = tk.Tk()
@@ -53,6 +80,14 @@ root.geometry("600x200")  # Breite erhöht für Listbox
 # Linker Frame für bestehende Widgets
 left_frame = tk.Frame(root)
 left_frame.pack(side=tk.LEFT, padx=10, pady=10)
+root.geometry("500x300")  # Höhe erhöht für mehrzeiligen Text
+
+# Frames für Layout
+left_frame = tk.Frame(root)
+left_frame.pack(side='left', padx=10, pady=10)
+
+right_frame = tk.Frame(root)
+right_frame.pack(side='right', padx=10, pady=10)
 
 # Eingabe
 tk.Label(left_frame, text="Wert eingeben:").pack(pady=5)
@@ -86,5 +121,9 @@ right_frame.pack(side=tk.RIGHT, padx=10, pady=10)
 tk.Label(right_frame, text="Letzte Umrechnungen:").pack(pady=5)
 listbox = tk.Listbox(right_frame, width=40, height=10)
 listbox.pack()
+
+# Formelanzeige im rechten Frame
+formula_label = tk.Label(right_frame, text="Benutze Umrechnungssformel:", justify='left')
+formula_label.pack()
 
 root.mainloop()
